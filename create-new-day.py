@@ -2,52 +2,73 @@ import shutil
 from pathlib import Path
 import sys
 import logging
+from aocd import get_data, get_day_desc
+from datetime import date
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
-def create_day_folder(day_number: int) -> None:
+def create_day_folder(day_number: int, year: int = date.today().year) -> None:
     """
-    Create a new day folder from template.
+    Create a new day folder from template and fetch puzzle data.
     
     Args:
         day_number: The day number to create
+        year: AOC year (defaults to current year)
     """
+    load_dotenv()  # Load AOC session token
     template_dir = Path('template-day')
     new_day_dir = Path(f'day-{day_number}')
     
-    # Check if template exists
+    # Validate inputs
     if not template_dir.exists():
         logger.error("Template directory not found!")
         sys.exit(1)
-        
-    # Check if day already exists
+    
     if new_day_dir.exists():
         logger.error(f"Day {day_number} already exists!")
         sys.exit(1)
-        
+
     try:
-        # Copy template to new day folder
+        # Create folder structure
         shutil.copytree(template_dir, new_day_dir)
         logger.info(f"Created new day: {new_day_dir}")
-        
+
+        # Fetch puzzle input
+        input_data = get_data(day=day_number, year=year)
+        input_path = new_day_dir / "input.txt"
+        input_path.write_text(input_data)
+        logger.info(f"Downloaded input data: {len(input_data)} bytes")
+
+        # Fetch puzzle description
+        puzzle_desc = get_day_desc(day=day_number, year=year)
+        readme_path = new_day_dir / "README.md"
+        readme_content = f"""# Day {day_number}: {year}
+
+{puzzle_desc}
+"""
+        readme_path.write_text(readme_content)
+        logger.info("Created README with puzzle description")
+
     except Exception as e:
         logger.error(f"Error creating day {day_number}: {e}")
         sys.exit(1)
 
 def main() -> int:
     """Main program entry point."""
-    if len(sys.argv) != 2:
-        logger.error("Usage: python create_new_day.py <day_number>")
+    if len(sys.argv) not in (2, 3):
+        logger.error("Usage: python create_new_day.py <day_number> [year]")
         return 1
         
     try:
         day_number = int(sys.argv[1])
-        create_day_folder(day_number)
+        year = int(sys.argv[2]) if len(sys.argv) > 2 else date.today().year
+        create_day_folder(day_number, year)
         return 0
         
     except ValueError:
-        logger.error("Day number must be an integer")
+        logger.error("Day number and year must be integers")
         return 1
 
 if __name__ == "__main__":
