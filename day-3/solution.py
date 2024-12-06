@@ -1,3 +1,4 @@
+import re
 from aocd import submit, AocdError
 import sys
 
@@ -6,15 +7,41 @@ def read_input(file_path: str) -> str:
     with open(file_path, 'r') as file:
         return file.read().strip()
 
+def extract_mul_instructions(data: str) -> list:
+    """Extract valid mul instructions from the corrupted memory."""
+    pattern_mul = re.compile(r'mul\((\d+),(\d+)\)')
+    pattern_do = re.compile(r'do\(\)')
+    pattern_dont = re.compile(r"don't\(\)")
+    
+    instructions = []
+    enabled = True  # Initially, mul instructions are enabled
+    
+    for line in data.splitlines():
+        if pattern_do.search(line):
+            enabled = True
+            print("do() found, enabling mul instructions")
+        elif pattern_dont.search(line):
+            enabled = False
+            print("don't() found, disabling mul instructions")
+        elif enabled:
+            found_instructions = [(int(x), int(y)) for x, y in pattern_mul.findall(line)]
+            if found_instructions:
+                print(f"Enabled and found mul instructions: {found_instructions}")
+            instructions.extend(found_instructions)
+    
+    return instructions
+
 def part1(data: str) -> int:
     """Solve part 1 of the puzzle."""
-    # ...implement part 1 solution...
-    return 0
+    instructions = extract_mul_instructions(data)
+    print(f"Part 1 instructions: {instructions}")
+    return sum(x * y for x, y in instructions)
 
 def part2(data: str) -> int:
     """Solve part 2 of the puzzle."""
-    # ...implement part 2 solution...
-    return 0
+    instructions = extract_mul_instructions(data)
+    print(f"Part 2 instructions: {instructions}")
+    return sum(x * y for x, y in instructions)
 
 def main() -> None:
     """Main function to solve the puzzle."""
@@ -25,7 +52,7 @@ def main() -> None:
     if len(sys.argv) > 1 and sys.argv[1] == "--send-it":
         print("Step 5: Submitting the result via aocd")
         try:
-            submit(part1(input_data), part="1", day=1, year=2024)
+            submit(part1(input_data), part="2", day=3, year=2024)
             print("🌟️🌟️🌟️Gooooold starrrrrr!🌟️🌟️🌟️ Submission successful! The answer is correct. ")
         except AocdError as e:
             print(f"Submission failed: {e}")
