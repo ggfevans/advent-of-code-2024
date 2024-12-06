@@ -41,11 +41,12 @@ def create_day_folder(day_number: int, year: int = date.today().year) -> None:
         logger.info(f"Downloaded input data: {len(input_data)} bytes")
 
         # Fetch puzzle description
-        puzzle_desc = puzzle.title
+        puzzle_title = puzzle.title
+        puzzle_desc = puzzle.answer_a
         readme_path = new_day_dir / "README.md"
         readme_content = f"""# Day {day_number}: {year}
 
-{puzzle_desc}
+{puzzle_title}
 """
         readme_path.write_text(readme_content)
         logger.info("Created README with puzzle description")
