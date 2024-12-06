@@ -19,28 +19,21 @@ def extract_mul_instructions(data: str) -> list:
     for line in data.splitlines():
         if pattern_do.search(line):
             enabled = True
-            print("do() found, enabling mul instructions")
         elif pattern_dont.search(line):
             enabled = False
-            print("don't() found, disabling mul instructions")
         elif enabled:
-            found_instructions = [(int(x), int(y)) for x, y in pattern_mul.findall(line)]
-            if found_instructions:
-                print(f"Enabled and found mul instructions: {found_instructions}")
-            instructions.extend(found_instructions)
+            instructions.extend((int(x), int(y)) for x, y in pattern_mul.findall(line))
     
     return instructions
 
 def part1(data: str) -> int:
     """Solve part 1 of the puzzle."""
     instructions = extract_mul_instructions(data)
-    print(f"Part 1 instructions: {instructions}")
     return sum(x * y for x, y in instructions)
 
 def part2(data: str) -> int:
     """Solve part 2 of the puzzle."""
     instructions = extract_mul_instructions(data)
-    print(f"Part 2 instructions: {instructions}")
     return sum(x * y for x, y in instructions)
 
 def main() -> None:
