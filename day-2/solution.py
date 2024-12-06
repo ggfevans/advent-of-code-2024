@@ -8,6 +8,16 @@ def is_safe(report):
     decreasing = all(report[i] > report[i + 1] and 1 <= report[i] - report[i + 1] <= 3 for i in range(len(report) - 1))
     return increasing or decreasing
 
+def is_safe_with_dampener(report):
+    if is_safe(report):
+        return True
+    for i in range(len(report)):
+        modified_report = report[:i] + report[i+1:]
+        if is_safe(modified_report):
+            print(f"Report {report} is made safe by removing level {report[i]}")
+            return True
+    return False
+
 def count_safe_reports(filepath):
     print("Step 1: Reading the input file")
     safe_count = 0
@@ -15,7 +25,7 @@ def count_safe_reports(filepath):
         for line in file:
             try:
                 report = list(map(int, line.split()))
-                if is_safe(report):
+                if is_safe_with_dampener(report):
                     safe_count += 1
             except ValueError:
                 print(f"Warning: Skipping malformed report: {line.strip()}")
@@ -31,7 +41,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--send-it":
         print("Step 5: Submitting the result via aocd")
         try:
-            submit(safe_count, part="1", day=2, year=2024)
+            submit(safe_count, part="2", day=2, year=2024)
             print("🌟️🌟️🌟️Gooooold starrrrrr!🌟️🌟️🌟️ Submission successful! The answer is correct. ")
         except AocdError as e:
             print(f"Submission failed: {e}")
