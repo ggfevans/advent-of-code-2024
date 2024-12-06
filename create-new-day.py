@@ -2,9 +2,8 @@ import shutil
 from pathlib import Path
 import sys
 import logging
-from aocd import get_data, get_day_desc
+from aocd.models import Puzzle
 from datetime import date
-from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -17,7 +16,6 @@ def create_day_folder(day_number: int, year: int = date.today().year) -> None:
         day_number: The day number to create
         year: AOC year (defaults to current year)
     """
-    load_dotenv()  # Load AOC session token
     template_dir = Path('template-day')
     new_day_dir = Path(f'day-{day_number}')
     
@@ -35,14 +33,15 @@ def create_day_folder(day_number: int, year: int = date.today().year) -> None:
         shutil.copytree(template_dir, new_day_dir)
         logger.info(f"Created new day: {new_day_dir}")
 
-        # Fetch puzzle input
-        input_data = get_data(day=day_number, year=year)
+        # Fetch puzzle data
+        puzzle = Puzzle(year=year, day=day_number)
+        input_data = puzzle.input_data
         input_path = new_day_dir / "input.txt"
         input_path.write_text(input_data)
         logger.info(f"Downloaded input data: {len(input_data)} bytes")
 
         # Fetch puzzle description
-        puzzle_desc = get_day_desc(day=day_number, year=year)
+        puzzle_desc = puzzle.title
         readme_path = new_day_dir / "README.md"
         readme_content = f"""# Day {day_number}: {year}
 
